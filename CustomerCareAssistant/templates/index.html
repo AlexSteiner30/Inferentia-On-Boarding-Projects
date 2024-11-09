@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Customer Care Assistant</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Customer Care Assistant</h2>
+        </div>
+        <div class="chat-window" id="chat-window">
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type your message..." />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const chatWindow = document.getElementById("chat-window");
+            const userInput = document.getElementById("user-input").value;
+
+            if (userInput.trim() !== "") {
+                const userMessage = document.createElement("div");
+                userMessage.classList.add("message", "user-message");
+                userMessage.textContent = userInput;
+                chatWindow.appendChild(userMessage);
+
+                document.getElementById("user-input").value = "";
+
+                const botMessage = document.createElement("div");
+                botMessage.classList.add("message", "bot-message");
+                botMessage.textContent = "...";
+                chatWindow.appendChild(botMessage);
+
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+
+                (async () => {
+                    const rawResponse = await fetch('/query', {
+                        method: 'POST',
+                        headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({query: userInput})
+                    });
+                    const content = await rawResponse.json();
+                    botMessage.textContent = content['response'];
+                })();
+            }
+        }
+    </script>
+</body>
+
+</html>
+<style>
